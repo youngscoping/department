@@ -1,0 +1,27 @@
+# Sử dụng image Maven để xây dựng ứng dụng
+FROM maven:3.8.6-openjdk-17 AS build
+
+# Thiết lập thư mục làm việc
+WORKDIR /app
+
+# Sao chép file pom.xml và source code vào container
+COPY pom.xml .
+COPY src ./src
+
+# Xây dựng ứng dụng
+RUN mvn clean package -DskipTests
+
+# Sử dụng image OpenJDK để chạy ứng dụng
+FROM openjdk:17-jdk-slim
+
+# Thiết lập thư mục làm việc
+WORKDIR /app
+
+# Sao chép file JAR từ container build vào container chạy
+COPY --from=build /app/target/your-app.jar app.jar
+
+# Chỉ định lệnh để chạy ứng dụng
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+
+# Mở cổng mà ứng dụng Spring Boot sẽ lắng nghe
+EXPOSE 8080
